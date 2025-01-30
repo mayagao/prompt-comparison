@@ -1,0 +1,56 @@
+{
+  "models": {
+    "gpt4": {
+      "provider": "openai",
+      "model": "gpt-4",
+      "temperature": 0.7,
+      "max_tokens": 1000
+    },
+    "gpt35": {
+      "provider": "openai",
+      "model": "gpt-3.5-turbo",
+      "temperature": 0.7,
+      "max_tokens": 1000
+    }
+  },
+  "prompts": [
+    {
+      "id": "summarize",
+      "name": "Text Summarizer",
+      "description": "Summarizes text in a specified style",
+      "template": "Summarize the following text in {style} style:\n{text}",
+      "variables": [
+        {
+          "name": "text",
+          "description": "The text to summarize",
+          "type": "string",
+          "isMain": true
+        },
+        {
+          "name": "style",
+          "description": "The style of summarization",
+          "type": "string",
+          "isMain": false,
+          "options": ["concise", "detailed", "bullet-points"],
+          "default": "concise"
+        }
+      ],
+      "modelConfig": "gpt35"
+    },
+    {
+      "id": "sentiment",
+      "name": "Sentiment Analyzer",
+      "description": "Analyzes sentiment of given text",
+      "template": "Analyze the sentiment of the following text:\n{text}",
+      "variables": [
+        {
+          "name": "text",
+          "description": "The text to analyze",
+          "type": "string",
+          "isMain": true
+        }
+      ],
+      "modelConfig": "gpt35"
+    }
+  ]
+}

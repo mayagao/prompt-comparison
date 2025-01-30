@@ -15,37 +15,99 @@
   },
   "prompts": [
     {
-      "id": "summarize",
+      "id": "summarize-1",
       "name": "Text Summarizer",
       "description": "Summarizes text in a specified style",
-      "template": "Summarize the following text in {style} style:\n{text}",
+      "template": [
+        "As a **senior technical writer** at a major software company, analyze the changes in {patch_url} and create clear, scannable summary.",
+        "",
+        "Your writing must follow these key principles:",
+        "- Use **bold headers** that developers can quickly scan",
+        "- **Group related changes** together logically",
+        "- Maintain **technical precision** while avoiding unnecessary jargon",
+        "- Focus on **impact and value** to the developer",
+        "",
+        "Format the release notes as follows:",
+        "",
+        "- Format the first line to list all key changes and their purposes, like:",
+        "This pull request implements **[list all key changes, separated by commas]** for [list all purposes, separated by commas]",
+        "* **[Category]**: [What changed and why it matters for developers]",
+        "* **[Category]**: [Technical details with clear impact statement]",
+        "```",
+        "",
+        "Requirements:",
+        "- Each category should highlight a distinct area of change",
+        "- Descriptions should balance technical accuracy with clarity",
+        "- Impact statements should focus on developer benefits",
+        "- Avoid implementation details unless crucial for understanding"
+      ],
       "variables": [
         {
-          "name": "text",
-          "description": "The text to summarize",
+          "name": "patch_url",
+          "description": "URL of the code diffs",
           "type": "string",
           "isMain": true
-        },
-        {
-          "name": "style",
-          "description": "The style of summarization",
-          "type": "string",
-          "isMain": false,
-          "options": ["concise", "detailed", "bullet-points"],
-          "default": "concise"
         }
       ],
       "modelConfig": "gpt35"
     },
     {
-      "id": "sentiment",
-      "name": "Sentiment Analyzer",
-      "description": "Analyzes sentiment of given text",
-      "template": "Analyze the sentiment of the following text:\n{text}",
+      "id": "summarize-2",
+      "name": "Text Summarizer",
+      "description": "Summarizes text in a specified style",
+      "template": [
+        "Transform the changes from {patch_url} into clear summary.",
+        "",
+        "- First, **identify the main theme** of the changes (performance, features, security, etc.).",
+        "- Then, **categorize related changes** into 2-3 major groups.",
+        "- For each group:",
+        "  - Create a **bold category header**",
+        "  - Include a **concise explanation** of what changed and its impact",
+        "  - **Link related changes** together in the same section",
+        "- Output everything following this structure:",
+        "",
+        "This pull request implements **[Primary Change]**, **[Secondary Change]**, [and **[Additional Changes]**...] for [purpose 1], [purpose 2], [and additional purposes...]",
+        "* **[Category]**: [Changes and Impact]",
+        "* **[Category]**: [Changes and Impact]",
+        ""
+      ],
       "variables": [
         {
-          "name": "text",
-          "description": "The text to analyze",
+          "name": "patch_url",
+          "description": "URL of the code diffs",
+          "type": "string",
+          "isMain": true
+        }
+      ],
+      "modelConfig": "gpt35"
+    },
+    {
+      "id": "summarize-3",
+      "name": "Sentiment Analyzer",
+      "description": "Analyzes sentiment of given text",
+      "template": [
+        "Summarize the changes introduced in {patch_url} in under 80 words.",
+        "",
+        "- Begin with a **one-sentence summary** wrapped inside a `<div className=\"description\">` tag, emphasizing the key **changes** with **bolded keywords**.",
+        "- List the **core changes** using an **unordered list**, where each item:",
+        "  - Starts with a **bolded section title**, summarizing the key change.",
+        "  - Contains a **concise, synthesized explanation** of what was modified and why, **avoiding redundant details**.",
+        "  - Does **not use nested lists**—all points remain at a single level.",
+        "- **Deprioritize minor implementation details** unless they are crucial for understanding the update.",
+        "- **Include relevant links** to the core logic, documentation, or tests where applicable.",
+        "- Output everything following this structure:",
+        "",
+        "```markdown",
+        "<div className=\"description\">Brief summary of the update, highlighting key enhancements.</div>",
+        "",
+        "- **[Section Title]** : Concise explanation of what changed and why, avoiding redundant details.",
+        "- **[Another Section Title]** : Another key change, with a clear and direct description.",
+        "```"
+      ],
+      "variables": [
+        {
+          "name": "patch_url",
+          "description": "URL of the code diffs",
           "type": "string",
           "isMain": true
         }

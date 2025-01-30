@@ -7,7 +7,7 @@ import {
   type Variable,
   type MetricsData,
 } from "../types";
-import promptsConfig from "../prompts/prompts.yaml";
+import promptsConfig from "../../prompts/prompts.yaml";
 import { type Config } from "../types/config";
 const config = promptsConfig as Config;
 

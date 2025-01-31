@@ -205,9 +205,9 @@ export default function CompareView() {
         <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">{error}</div>
       )}
 
-      <div className="overflow-x-auto flex">
+      <div className="overflow-x-auto grid grid-cols-5">
         <div className="w-1/4 min-w-[300px]">
-          <h2 className="text-lg font-semibold mb-4">Variables</h2>
+          <div className="h-[300px]"></div>
           {SCENARIOS.map((scenarioId) => (
             <div key={scenarioId} className="mb-8">
               <h3 className="text-md font-semibold mb-4">
@@ -258,6 +258,18 @@ export default function CompareView() {
         </div>
 
         <div className="flex-1">
+          <div className="flex divide-gray-200 truncate">
+            {config.prompts.map((prompt) => (
+              <div className="" key={prompt.id}>
+                {prompt.name}
+                <div className="whitespace-pre-wrap">
+                  {typeof prompt.template === "string"
+                    ? prompt.template
+                    : prompt.template.join("\n")}
+                </div>
+              </div>
+            ))}
+          </div>
           {SCENARIOS.map((scenarioId) => (
             <div key={scenarioId} className="mb-8">
               <h3 className="text-lg font-semibold mb-4">
@@ -272,14 +284,7 @@ export default function CompareView() {
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        <div className="">
-                          {prompt.name}
-                          <div className="whitespace-pre-wrap">
-                            {/* {typeof prompt.template === "string"
-                              ? prompt.template
-                              : prompt.template.join("\n")} */}
-                          </div>
-                        </div>
+                        <div className="">{prompt.name}</div>
                       </th>
                     ))}
                   </tr>

@@ -32,26 +32,6 @@ const OutputDisplay = ({ output }: { output: string }) => {
   );
 };
 
-const MainVariableDisplay = ({
-  variable,
-  onValueChange,
-}: {
-  variable: { name: string; value: string };
-  onValueChange: (value: string) => void;
-}) => {
-  return (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <h3 className="text-lg font-semibold">Main Variable: {variable.name}</h3>
-      <textarea
-        className="mt-2 w-full p-2 border rounded"
-        value={variable.value}
-        onChange={(e) => onValueChange(e.target.value)}
-        rows={4}
-      />
-    </div>
-  );
-};
-
 const MetricsDisplay = ({ metrics }: { metrics: MetricsData }) => {
   return (
     <div className="grid grid-row-4 gap-4">
@@ -124,9 +104,6 @@ export default function CompareView() {
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState("");
   const [promptStates, setPromptStates] = useState<Record<string, string>>({});
-
-  const firstPrompt = config.prompts[0];
-  const mainVariable = firstPrompt?.variables.find((v) => v.isMain);
 
   useEffect(() => {
     const cached = localStorage.getItem(CACHE_KEY);

@@ -29,17 +29,29 @@ code {
   font-size: 0.95em;
 }
 
-li {
-  &::before {
-    content: "•";
-    margin-right: 0.5rem;
+.whitespace-normal {
+  ul {
+    margin-bottom: 0.5rem;
   }
-  > ul {
-    margin-left: 1rem;
+  li {
+    padding-left: 0.75rem;
+    &::before {
+      content: "•";
+      margin-right: 0.25rem;
+      margin-left: -0.6rem;
+    }
+    > ul {
+      /* margin-left: 1rem; */
+    }
   }
-}
-pre {
-  text-wrap: pretty;
+  pre {
+    text-wrap: pretty;
+    border-radius: 6px;
+    padding: 0.5rem;
+    background-color: #f7f7f7;
+    margin: 0.5rem;
+    color: #333;
+  }
 }
 
 td {
@@ -48,4 +60,22 @@ td {
   align-self: flex-start;
   text-align: left;
   vertical-align: top;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto auto auto auto;
+  max-width: 100%;
+}
+
+.box-header {
+  grid-row: 1;
+}
+
+.box-content {
+  grid-column: span 6;
+}
+th {
+  width: 20%;
 }

@@ -34,7 +34,7 @@ const OutputDisplay = ({ output }: { output: string }) => {
 
 const MetricsDisplay = ({ metrics }: { metrics: MetricsData }) => {
   return (
-    <div className="grid grid-row-4 gap-4">
+    <div className="grid grid-row-4 gap-1">
       <div>
         <span className="font-medium">Token Usage:</span>
         <span className="ml-2">{metrics.tokenUsage}</span>
@@ -188,16 +188,22 @@ export default function CompareView() {
   };
 
   const generateScenarioForm = (scenarioId: number) => (
-    <div key={scenarioId} className="mb-8">
+    <div key={scenarioId} className="mb-8 px-4 py-4">
       <h3 className="text-md font-semibold mb-4">Scenario {scenarioId + 1}</h3>
       <div className="space-y-4">
         {getAllVariables().map((variable) => (
-          <div
-            key={`${variable.name}-${scenarioId}`}
-            className="bg-white rounded-lg shadow p-4"
-          >
-            <h3 className="text-md font-semibold">{variable.name}</h3>
-            <p className="text-sm text-gray-600 mb-2">{variable.description}</p>
+          <div key={`${variable.name}-${scenarioId}`} className="">
+            <h3 className="mb-1 font-medium">{variable.name}</h3>
+            {/* <div className="text-gray-600 mb-2">{variable.description}</div> */}
+
+            <textarea
+              className="w-full p-2 border rounded "
+              value={variables[variable.name]?.[scenarioId] || ""}
+              onChange={(e) =>
+                handleVariableChange(variable.name, e.target.value, scenarioId)
+              }
+              rows={2}
+            />
             <p className="text-xs text-gray-500 mb-2">
               Used in:{" "}
               {variable.promptIds
@@ -207,22 +213,6 @@ export default function CompareView() {
                 })
                 .join(", ")}
             </p>
-            <div className="space-y-2">
-              <div>
-                <textarea
-                  className="w-full p-2 border rounded text-sm"
-                  value={variables[variable.name]?.[scenarioId] || ""}
-                  onChange={(e) =>
-                    handleVariableChange(
-                      variable.name,
-                      e.target.value,
-                      scenarioId
-                    )
-                  }
-                  rows={2}
-                />
-              </div>
-            </div>
           </div>
         ))}
       </div>
@@ -248,69 +238,59 @@ export default function CompareView() {
       )}
 
       <div className="overflow-x-auto">
-        <div className="grid grid-cols-4 gap-4"></div>
-
-        <div className="flex-1">
-          <div className="sticky top-0  grid grid-cols-5 flex divide-gray-200 truncate grid grid-cols-4 gap-4">
-            <div></div>
-            {config.prompts.map((prompt) => (
-              <div className="relative" key={prompt.id}>
-                <div className="sticky top-0 bg-white z-10 py-2 border-b shadow-sm">
-                  {prompt.name}
-                </div>
-
-                <OutputDisplay
-                  output={
-                    typeof prompt.template === "string"
-                      ? prompt.template
-                      : prompt.template.join("\n")
-                  }
-                />
+        <div className="container">
+          <div className="box-header box">How to use: </div>
+          {config.prompts.map((prompt) => (
+            <div
+              style={{ paddingBottom: 12 }}
+              className="relative px-2 box box-header"
+              key={prompt.id}
+            >
+              <div className="text-gray-800 text-md font-medium">
+                {prompt.name}
               </div>
-            ))}
-          </div>
+              <div className="text-gray-500 mb-2">{prompt.description}</div>
+
+              <OutputDisplay
+                output={
+                  typeof prompt.template === "string"
+                    ? prompt.template
+                    : prompt.template.join("\n")
+                }
+              />
+            </div>
+          ))}
+
           {SCENARIOS.map((scenarioId) => (
-            <div key={scenarioId} className="mb-8 grid grid-cols-5">
+            <div key={scenarioId} className="box box-content grid grid-cols-6">
               <div className="col-span-1">
-                <div>{generateScenarioForm(scenarioId)}</div>
+                {generateScenarioForm(scenarioId)}
               </div>
-              <table className="min-w-full divide-y divide-gray-200 col-span-4">
-                <thead className="bg-gray-50">
-                  <tr>
+
+              <table className="min-w-full divide-y divide-gray-200 col-span-5">
+                <thead className="">
+                  <tr className="">
                     {config.prompts.map((prompt) => (
                       <th
                         key={prompt.id}
                         scope="col"
-                        className="px-2 py-2 text-left text-xs font-medium text-gray-500"
+                        className="px-2 py-2 text-left text-xs font-normal text-gray-500"
                       >
-                        <div className="">{prompt.name}</div>
+                        <div className="text-gray-800 text-md font-medium">
+                          {prompt.name}
+                        </div>
+                        <div className="text-gray-500 ">
+                          {prompt.description}
+                        </div>
                       </th>
                     ))}
                   </tr>
                   <tr>
                     {config.prompts.map((prompt) => (
-                      <td key={prompt.id} className="px-2 py-2">
-                        {prompt.variables.map((v, idx) => (
-                          <div key={idx} className="text-black-600 truncate">
-                            <span className="text-gray-500">{v.name}:</span>
-                            <span className="text-gray-800">
-                              <span>
-                                {variables[v.name]?.[scenarioId] ||
-                                  v.default ||
-                                  ""}
-                              </span>
-                            </span>
-                          </div>
-                        ))}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    {config.prompts.map((prompt) => (
                       <th
                         key={prompt.id}
                         scope="col"
-                        className="px-2 py-2 text-left text-xs font-medium text-gray-500 "
+                        className="pb-2 text-left text-xs font-medium text-gray-500 "
                       >
                         <div className="">
                           <button
@@ -334,11 +314,11 @@ export default function CompareView() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
+                  <tr style={{ height: 100 }}>
                     {config.prompts.map((prompt) => (
                       <td
                         key={prompt.id}
-                        className="px-6 py-4 whitespace-nowrap"
+                        className="px-2 py-2 whitespace-nowrap"
                       >
                         {results.find(
                           (r) =>
@@ -357,7 +337,6 @@ export default function CompareView() {
                         ) : (
                           <span className="text-gray-400">No data</span>
                         )}
-                        {prompt.modelConfig}
                       </td>
                     ))}
                   </tr>
@@ -365,7 +344,7 @@ export default function CompareView() {
                     {config.prompts.map((prompt) => (
                       <td
                         key={prompt.id}
-                        className="px-6 py-4 whitespace-normal"
+                        className="px-2 py-2 whitespace-normal"
                       >
                         {isLoading[`${prompt.id}-${scenarioId}`] ? (
                           <span className="text-gray-400">Loading...</span>

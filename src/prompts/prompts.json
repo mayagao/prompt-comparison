@@ -63,7 +63,8 @@
         "  - Create a **bold category header**",
         "  - Include a **concise explanation** of what changed and its impact",
         "  - **Link related changes** together in the same section",
-        "- Output everything following this structure:",
+        "",
+        "Output everything following this structure:",
         "",
         "Implements **[Primary Change]**, **[Secondary Change]**, [and **[Additional Changes]**...] for [purpose 1], [purpose 2], [and additional purposes...]",
         "* **[Category]**: [Changes and Impact]",
@@ -83,7 +84,7 @@
     {
       "id": "summarize-3",
       "name": "Format",
-      "description": "Describe the format in a specific way",
+      "description": "Describe the format in code",
       "template": [
         "Summarize the changes introduced in {patch_url} in under 80 words.",
         "",
@@ -115,10 +116,10 @@
     },
     {
       "id": "summarize-4",
-      "name": "Additional Context",
-      "description": "Use additional contexts beyond code diffs",
+      "name": "Additional contexts",
+      "description": "With diff as attachment",
       "template": [
-        "As a **senior technical writer** at a major software company, analyze the following GitHub Pull Request and create a clear, scannable summary in under 80 words:",
+        "As a **senior technical writer** at a major software company, analyze the following GitHub Pull Request and create a clear, scannable summary. ",
         "",
         "PR Context:",
         "- Title: {pr_title}",
@@ -132,8 +133,56 @@
         "- Focus on **impact and value** to the developer",
         "- Reference specific files/components when relevant",
         "",
+        "Format the summary as follows, under 80 words:",
+        "Implements **[list key changes in bold]** for [extract purposes]",
+        "* **[Category based on changed files/components]**: [What changed and why it matters for developers]",
+        "* **[Category]**: [Technical details with clear impact statement]",
+        ""
+      ],
+      "variables": [
+        {
+          "name": "pr_title",
+          "description": "Title from GitHub PR",
+          "type": "string",
+          "isMain": true
+        },
+        {
+          "name": "pr_description",
+          "description": "Description/body from GitHub PR",
+          "type": "string",
+          "isMain": true
+        },
+        {
+          "name": "changed_files",
+          "description": "List of files changed in PR",
+          "type": "array",
+          "isMain": true
+        }
+      ],
+      "modelConfig": "gpt35"
+    },
+    {
+      "id": "summarize-5",
+      "name": "Additional contexts link only",
+      "description": "With diff as just a link",
+      "template": [
+        "As a **senior technical writer** at a major software company, analyze the following GitHub Pull Request and create a clear, scannable summary in under 80 words:",
+        "",
+        "",
+        "PR Context:",
+        "- Title: {pr_title}",
+        "- Description: {pr_description}",
+        "- Changed diffs: {patch_url}",
+        "",
+        "Your writing must follow these key principles:",
+        "- Use **bold headers** that developers can quickly scan",
+        "- **Group related changes** together logically",
+        "- Maintain **technical precision** while avoiding unnecessary jargon",
+        "- Focus on **impact and value** to the developer",
+        "- Reference specific files/components when relevant",
+        "",
         "Format the release notes as follows:",
-        "Implements **[list key changes]** for [extract purposes from PR context]",
+        "Implements **[list key changes in bold]** for [extract purposes]",
         "* **[Category based on changed files/components]**: [What changed and why it matters for developers]",
         "* **[Category]**: [Technical details with clear impact statement]"
       ],
@@ -154,12 +203,6 @@
           "name": "pr_description",
           "description": "Description/body from GitHub PR",
           "type": "string",
-          "isMain": true
-        },
-        {
-          "name": "changed_files",
-          "description": "List of files changed in PR",
-          "type": "array",
           "isMain": true
         }
       ],

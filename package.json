@@ -18,6 +18,7 @@
     "react-dom": "^19.0.0",
     "react-markdown": "^9.0.3",
     "rehype-raw": "^7.0.0",
+    "tailwind": "^4.0.0",
     "yaml-loader": "^0.8.1"
   },
   "devDependencies": {

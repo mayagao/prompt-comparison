@@ -21,6 +21,7 @@ interface PromptResult {
   metrics: MetricsData;
   output: string;
   variables: string;
+  scenarioId: number;
 }
 
 const OutputDisplay = ({ output }: { output: string }) => {
@@ -81,7 +82,7 @@ const getAllVariables = () => {
       name: string;
       description: string;
       isMain: boolean;
-      promptIds: string[]; // Track which prompts use this variable
+      promptIds: string[];
     }
   >();
 
@@ -113,9 +114,12 @@ const getAllVariables = () => {
 export default function CompareView() {
   const CACHE_KEY = "promptResults";
   const VARIABLES_CACHE_KEY = "promptVariables";
+  const SCENARIOS = [0, 1, 2]; // Three scenarios
 
   const [results, setResults] = useState<PromptResult[]>([]);
-  const [variables, setVariables] = useState<Record<string, string>>({});
+  const [variables, setVariables] = useState<
+    Record<string, Record<number, string>>
+  >({});
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState("");
@@ -142,21 +146,34 @@ export default function CompareView() {
     setPromptStates(initialPromptStates);
   }, []);
 
-  const handleRunPrompt = async (promptId: string) => {
-    setIsLoading((prev) => ({ ...prev, [promptId]: true }));
+  const handleRunPrompt = async (promptId: string, scenarioId: number) => {
+    setIsLoading((prev) => ({ ...prev, [`${promptId}-${scenarioId}`]: true }));
     setError(null);
 
     try {
       const service = new OpenAIService(apiKey);
-      const result = await service.runPrompt(promptId, variables, config);
+      const scenarioVariables = Object.fromEntries(
+        Object.entries(variables).map(([key, value]) => [
+          key,
+          value[scenarioId] || "",
+        ])
+      );
+      const result = await service.runPrompt(
+        promptId,
+        scenarioVariables,
+        config
+      );
       const resultWithVars = {
         ...result,
-        variables: JSON.stringify(variables),
+        variables: JSON.stringify(scenarioVariables),
+        scenarioId,
       };
 
       setResults((prev) => {
         const newResults = [...prev];
-        const index = newResults.findIndex((r) => r.promptId === promptId);
+        const index = newResults.findIndex(
+          (r) => r.promptId === promptId && r.scenarioId === scenarioId
+        );
         if (index >= 0) {
           newResults[index] = resultWithVars;
         } else {
@@ -168,19 +185,29 @@ export default function CompareView() {
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setIsLoading((prev) => ({ ...prev, [promptId]: false }));
+      setIsLoading((prev) => ({
+        ...prev,
+        [`${promptId}-${scenarioId}`]: false,
+      }));
     }
   };
 
-  const handleMainVariableChange = (value: string) => {
-    if (mainVariable) {
+  const handleVariableChange = (
+    variableName: string,
+    value: string,
+    scenarioId: number
+  ) => {
+    setVariables((prev) => {
       const newVariables = {
-        ...variables,
-        [mainVariable.name]: value,
+        ...prev,
+        [variableName]: {
+          ...prev[variableName],
+          [scenarioId]: value,
+        },
       };
-      setVariables(newVariables);
       localStorage.setItem(VARIABLES_CACHE_KEY, JSON.stringify(newVariables));
-    }
+      return newVariables;
+    });
   };
 
   return (
@@ -204,131 +231,180 @@ export default function CompareView() {
       <div className="overflow-x-auto flex">
         <div className="w-1/4 min-w-[300px]">
           <h2 className="text-lg font-semibold mb-4">Variables</h2>
-          <div className="space-y-4">
-            {getAllVariables().map((variable) => (
-              <div
-                key={variable.name}
-                className="bg-white rounded-lg shadow p-4"
-              >
-                <h3 className="text-md font-semibold">{variable.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">
-                  {variable.description}
-                </p>
-                <p className="text-xs text-gray-500 mb-2">
-                  Used in:{" "}
-                  {variable.promptIds
-                    .map((id) => {
-                      const prompt = config.prompts.find((p) => p.id === id);
-                      return prompt?.name || id;
-                    })
-                    .join(", ")}
-                </p>
-                <div className="space-y-2">
-                  <div>
-                    <textarea
-                      className="w-full p-2 border rounded text-sm"
-                      value={variables[variable.name] || ""}
-                      onChange={(e) => handleMainVariableChange(e.target.value)}
-                      rows={2}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {config.prompts.map((prompt) => (
-                <th
-                  key={prompt.id}
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  <div className="">
-                    {prompt.name}
-
-                    <div className="whitespace-pre-wrap">
-                      {typeof prompt.template === "string"
-                        ? prompt.template
-                        : prompt.template.join("\n")}
+          {SCENARIOS.map((scenarioId) => (
+            <div key={scenarioId} className="mb-8">
+              <h3 className="text-md font-semibold mb-4">
+                Scenario {scenarioId + 1}
+              </h3>
+              <div className="space-y-4">
+                {getAllVariables().map((variable) => (
+                  <div
+                    key={`${variable.name}-${scenarioId}`}
+                    className="bg-white rounded-lg shadow p-4"
+                  >
+                    <h3 className="text-md font-semibold">{variable.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {variable.description}
+                    </p>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Used in:{" "}
+                      {variable.promptIds
+                        .map((id) => {
+                          const prompt = config.prompts.find(
+                            (p) => p.id === id
+                          );
+                          return prompt?.name || id;
+                        })
+                        .join(", ")}
+                    </p>
+                    <div className="space-y-2">
+                      <div>
+                        <textarea
+                          className="w-full p-2 border rounded text-sm"
+                          value={variables[variable.name]?.[scenarioId] || ""}
+                          onChange={(e) =>
+                            handleVariableChange(
+                              variable.name,
+                              e.target.value,
+                              scenarioId
+                            )
+                          }
+                          rows={2}
+                        />
+                      </div>
                     </div>
                   </div>
-                </th>
-              ))}
-            </tr>
-            <tr>
-              {config.prompts.map((prompt) => (
-                <td key={prompt.id} className="px-6 py-4">
-                  {prompt.variables
-                    .map(
-                      (v) =>
-                        `${v.name}: ${variables[v.name] || v.default || ""}`
-                    )
-                    .join(", ")}
-                </td>
-              ))}
-            </tr>
-            <tr>
-              {config.prompts.map((prompt) => (
-                <th
-                  key={prompt.id}
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  <div className="">
-                    <button
-                      onClick={() => handleRunPrompt(prompt.id)}
-                      disabled={isLoading[prompt.id]}
-                      className={`ml-2 px-3 py-1 rounded text-white ${
-                        isLoading[prompt.id]
-                          ? "bg-gray-400"
-                          : "bg-blue-500 hover:bg-blue-600"
-                      }`}
-                    >
-                      {isLoading[prompt.id] ? "Running..." : "Re-run"}
-                    </button>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              {config.prompts.map((prompt) => (
-                <td key={prompt.id} className="px-6 py-4 whitespace-nowrap">
-                  {results.find((r) => r.promptId === prompt.id)?.metrics ? (
-                    <MetricsDisplay
-                      metrics={
-                        results.find((r) => r.promptId === prompt.id)!.metrics
-                      }
-                    />
-                  ) : (
-                    <span className="text-gray-400">No data</span>
-                  )}
-                  {prompt.modelConfig}
-                </td>
-              ))}
-            </tr>
-            <tr>
-              {config.prompts.map((prompt) => (
-                <td key={prompt.id} className="px-6 py-4 whitespace-normal">
-                  {isLoading[prompt.id] ? (
-                    <span className="text-gray-400">Loading...</span>
-                  ) : (
-                    <OutputDisplay
-                      output={
-                        results.find((r) => r.promptId === prompt.id)?.output ||
-                        "No output"
-                      }
-                    />
-                  )}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex-1">
+          {SCENARIOS.map((scenarioId) => (
+            <div key={scenarioId} className="mb-8">
+              <h3 className="text-lg font-semibold mb-4">
+                Scenario {scenarioId + 1}
+              </h3>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {config.prompts.map((prompt) => (
+                      <th
+                        key={prompt.id}
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        <div className="">
+                          {prompt.name}
+                          <div className="whitespace-pre-wrap">
+                            {/* {typeof prompt.template === "string"
+                              ? prompt.template
+                              : prompt.template.join("\n")} */}
+                          </div>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                  <tr>
+                    {config.prompts.map((prompt) => (
+                      <td key={prompt.id} className="px-6 py-4">
+                        {prompt.variables
+                          .map(
+                            (v) =>
+                              `${v.name}: ${
+                                variables[v.name]?.[scenarioId] ||
+                                v.default ||
+                                ""
+                              }`
+                          )
+                          .join(", ")}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    {config.prompts.map((prompt) => (
+                      <th
+                        key={prompt.id}
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        <div className="">
+                          <button
+                            onClick={() =>
+                              handleRunPrompt(prompt.id, scenarioId)
+                            }
+                            disabled={isLoading[`${prompt.id}-${scenarioId}`]}
+                            className={`ml-2 px-3 py-1 rounded text-white ${
+                              isLoading[`${prompt.id}-${scenarioId}`]
+                                ? "bg-gray-400"
+                                : "bg-blue-500 hover:bg-blue-600"
+                            }`}
+                          >
+                            {isLoading[`${prompt.id}-${scenarioId}`]
+                              ? "Running..."
+                              : "Re-run"}
+                          </button>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  <tr>
+                    {config.prompts.map((prompt) => (
+                      <td
+                        key={prompt.id}
+                        className="px-6 py-4 whitespace-nowrap"
+                      >
+                        {results.find(
+                          (r) =>
+                            r.promptId === prompt.id &&
+                            r.scenarioId === scenarioId
+                        )?.metrics ? (
+                          <MetricsDisplay
+                            metrics={
+                              results.find(
+                                (r) =>
+                                  r.promptId === prompt.id &&
+                                  r.scenarioId === scenarioId
+                              )!.metrics
+                            }
+                          />
+                        ) : (
+                          <span className="text-gray-400">No data</span>
+                        )}
+                        {prompt.modelConfig}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    {config.prompts.map((prompt) => (
+                      <td
+                        key={prompt.id}
+                        className="px-6 py-4 whitespace-normal"
+                      >
+                        {isLoading[`${prompt.id}-${scenarioId}`] ? (
+                          <span className="text-gray-400">Loading...</span>
+                        ) : (
+                          <OutputDisplay
+                            output={
+                              results.find(
+                                (r) =>
+                                  r.promptId === prompt.id &&
+                                  r.scenarioId === scenarioId
+                              )?.output || "No output"
+                            }
+                          />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

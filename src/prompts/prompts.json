@@ -30,7 +30,7 @@
         "Format the release notes as follows:",
         "",
         "- Format the first line to list all key changes and their purposes, like:",
-        "This pull request implements **[list all key changes, separated by commas]** for [list all purposes, separated by commas]",
+        "Implements **[list all key changes, separated by commas]** for [list all purposes, separated by commas]",
         "* **[Category]**: [What changed and why it matters for developers]",
         "* **[Category]**: [Technical details with clear impact statement]",
         "```",
@@ -66,7 +66,7 @@
         "  - **Link related changes** together in the same section",
         "- Output everything following this structure:",
         "",
-        "This pull request implements **[Primary Change]**, **[Secondary Change]**, [and **[Additional Changes]**...] for [purpose 1], [purpose 2], [and additional purposes...]",
+        "Implements **[Primary Change]**, **[Secondary Change]**, [and **[Additional Changes]**...] for [purpose 1], [purpose 2], [and additional purposes...]",
         "* **[Category]**: [Changes and Impact]",
         "* **[Category]**: [Changes and Impact]",
         ""

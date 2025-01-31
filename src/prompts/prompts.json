@@ -134,7 +134,7 @@
         "- Reference specific files/components when relevant",
         "",
         "Format the release notes as follows:",
-        "This pull request implements **[list key changes from title/description]** for [extract purposes from PR context]",
+        "Implements **[list key changes]** for [extract purposes from PR context]",
         "* **[Category based on changed files/components]**: [What changed and why it matters for developers]",
         "* **[Category]**: [Technical details with clear impact statement]"
       ],
@@ -163,7 +163,8 @@
           "type": "array",
           "isMain": true
         }
-      ]
+      ],
+      "modelConfig": "gpt35"
     }
   ]
 }

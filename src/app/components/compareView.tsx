@@ -201,16 +201,45 @@ export default function CompareView() {
         <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">{error}</div>
       )}
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto flex">
+        <div className="w-1/4 min-w-[300px]">
+          <h2 className="text-lg font-semibold mb-4">Variables</h2>
+          <div className="space-y-4">
+            {getAllVariables().map((variable) => (
+              <div
+                key={variable.name}
+                className="bg-white rounded-lg shadow p-4"
+              >
+                <h3 className="text-md font-semibold">{variable.name}</h3>
+                <p className="text-sm text-gray-600 mb-2">
+                  {variable.description}
+                </p>
+                <p className="text-xs text-gray-500 mb-2">
+                  Used in:{" "}
+                  {variable.promptIds
+                    .map((id) => {
+                      const prompt = config.prompts.find((p) => p.id === id);
+                      return prompt?.name || id;
+                    })
+                    .join(", ")}
+                </p>
+                <div className="space-y-2">
+                  <div>
+                    <textarea
+                      className="w-full p-2 border rounded text-sm"
+                      value={variables[variable.name] || ""}
+                      onChange={(e) => handleMainVariableChange(e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Prompts
-              </th>
               {config.prompts.map((prompt) => (
                 <th
                   key={prompt.id}
@@ -218,6 +247,8 @@ export default function CompareView() {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   <div className="">
+                    {prompt.name}
+
                     <div className="whitespace-pre-wrap">
                       {typeof prompt.template === "string"
                         ? prompt.template
@@ -228,9 +259,6 @@ export default function CompareView() {
               ))}
             </tr>
             <tr>
-              <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                Variables
-              </td>
               {config.prompts.map((prompt) => (
                 <td key={prompt.id} className="px-6 py-4">
                   {prompt.variables
@@ -243,12 +271,6 @@ export default function CompareView() {
               ))}
             </tr>
             <tr>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Trigger
-              </th>
               {config.prompts.map((prompt) => (
                 <th
                   key={prompt.id}
@@ -274,9 +296,6 @@ export default function CompareView() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             <tr>
-              <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                Metrics
-              </td>
               {config.prompts.map((prompt) => (
                 <td key={prompt.id} className="px-6 py-4 whitespace-nowrap">
                   {results.find((r) => r.promptId === prompt.id)?.metrics ? (
@@ -288,13 +307,11 @@ export default function CompareView() {
                   ) : (
                     <span className="text-gray-400">No data</span>
                   )}
+                  {prompt.modelConfig}
                 </td>
               ))}
             </tr>
             <tr>
-              <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                Output
-              </td>
               {config.prompts.map((prompt) => (
                 <td key={prompt.id} className="px-6 py-4 whitespace-normal">
                   {isLoading[prompt.id] ? (
@@ -312,39 +329,6 @@ export default function CompareView() {
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="w-1/4 min-w-[300px]">
-        <h2 className="text-lg font-semibold mb-4">Variables</h2>
-        <div className="space-y-4">
-          {getAllVariables().map((variable) => (
-            <div key={variable.name} className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-md font-semibold">{variable.name}</h3>
-              <p className="text-sm text-gray-600 mb-2">
-                {variable.description}
-              </p>
-              <p className="text-xs text-gray-500 mb-2">
-                Used in:{" "}
-                {variable.promptIds
-                  .map((id) => {
-                    const prompt = config.prompts.find((p) => p.id === id);
-                    return prompt?.name || id;
-                  })
-                  .join(", ")}
-              </p>
-              <div className="space-y-2">
-                <div>
-                  <textarea
-                    className="w-full p-2 border rounded text-sm"
-                    value={variables[variable.name] || ""}
-                    onChange={(e) => handleMainVariableChange(e.target.value)}
-                    rows={2}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

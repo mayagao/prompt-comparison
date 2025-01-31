@@ -5,7 +5,10 @@ export class OpenAIService {
   private client: OpenAI;
 
   constructor(apiKey: string) {
-    this.client = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+    this.client = new OpenAI({
+      apiKey,
+      dangerouslyAllowBrowser: true,
+    });
   }
   async runPrompt(
     promptId: string,

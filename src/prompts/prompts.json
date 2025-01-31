@@ -16,8 +16,8 @@
   "prompts": [
     {
       "id": "summarize-1",
-      "name": "Text Summarizer",
-      "description": "Summarizes text in a specified style",
+      "name": "Role and requirements",
+      "description": "Define roles and limations",
       "template": [
         "As a **senior technical writer** at a major software company, analyze the changes in {patch_url} and create clear, scannable summary in under 80 words.",
         "",
@@ -33,7 +33,6 @@
         "Implements **[list all key changes, separated by commas]** for [list all purposes, separated by commas]",
         "* **[Category]**: [What changed and why it matters for developers]",
         "* **[Category]**: [Technical details with clear impact statement]",
-        "```",
         "",
         "Requirements:",
         "- Each category should highlight a distinct area of change",
@@ -53,8 +52,8 @@
     },
     {
       "id": "summarize-2",
-      "name": "Text Summarizer",
-      "description": "Summarizes text in a specified style",
+      "name": "Step by step",
+      "description": "Describe the process step by step",
       "template": [
         "Transform the changes from {patch_url} into clear summary in under 80 words.",
         "",
@@ -83,8 +82,8 @@
     },
     {
       "id": "summarize-3",
-      "name": "Sentiment Analyzer",
-      "description": "Analyzes sentiment of given text",
+      "name": "Format",
+      "description": "Describe the format in a specific way",
       "template": [
         "Summarize the changes introduced in {patch_url} in under 80 words.",
         "",
@@ -97,7 +96,7 @@
         "- **Include relevant links** to the core logic, documentation, or tests where applicable.",
         "- Output everything following this structure:",
         "",
-        "```markdown",
+        "```",
         "<div className=\"description\">Brief summary of the update, highlighting key enhancements.</div>",
         "",
         "- **[Section Title]** : Concise explanation of what changed and why, avoiding redundant details.",
@@ -117,7 +116,7 @@
     {
       "id": "summarize-4",
       "name": "Additional Context",
-      "description": "Summarizes GitHub PR in a technical writer style",
+      "description": "Use additional contexts beyond code diffs",
       "template": [
         "As a **senior technical writer** at a major software company, analyze the following GitHub Pull Request and create a clear, scannable summary in under 80 words:",
         "",

@@ -26,7 +26,7 @@ interface PromptResult {
 
 const OutputDisplay = ({ output }: { output: string }) => {
   return (
-    <div className="prose max-w-none p-4 bg-gray-100 rounded-md">
+    <div className="whitespace-normal">
       <ReactMarkdown rehypePlugins={[rehypeRaw]}>{output}</ReactMarkdown>
     </div>
   );
@@ -187,8 +187,50 @@ export default function CompareView() {
     });
   };
 
+  const generateScenarioForm = (scenarioId: number) => (
+    <div key={scenarioId} className="mb-8">
+      <h3 className="text-md font-semibold mb-4">Scenario {scenarioId + 1}</h3>
+      <div className="space-y-4">
+        {getAllVariables().map((variable) => (
+          <div
+            key={`${variable.name}-${scenarioId}`}
+            className="bg-white rounded-lg shadow p-4"
+          >
+            <h3 className="text-md font-semibold">{variable.name}</h3>
+            <p className="text-sm text-gray-600 mb-2">{variable.description}</p>
+            <p className="text-xs text-gray-500 mb-2">
+              Used in:{" "}
+              {variable.promptIds
+                .map((id) => {
+                  const prompt = config.prompts.find((p) => p.id === id);
+                  return prompt?.name || id;
+                })
+                .join(", ")}
+            </p>
+            <div className="space-y-2">
+              <div>
+                <textarea
+                  className="w-full p-2 border rounded text-sm"
+                  value={variables[variable.name]?.[scenarioId] || ""}
+                  onChange={(e) =>
+                    handleVariableChange(
+                      variable.name,
+                      e.target.value,
+                      scenarioId
+                    )
+                  }
+                  rows={2}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="p-4">
+    <div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           OpenAI API Key
@@ -205,84 +247,41 @@ export default function CompareView() {
         <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">{error}</div>
       )}
 
-      <div className="overflow-x-auto grid grid-cols-5">
-        <div className="w-1/4 min-w-[300px]">
-          <div className="h-[300px]"></div>
-          {SCENARIOS.map((scenarioId) => (
-            <div key={scenarioId} className="mb-8">
-              <h3 className="text-md font-semibold mb-4">
-                Scenario {scenarioId + 1}
-              </h3>
-              <div className="space-y-4">
-                {getAllVariables().map((variable) => (
-                  <div
-                    key={`${variable.name}-${scenarioId}`}
-                    className="bg-white rounded-lg shadow p-4"
-                  >
-                    <h3 className="text-md font-semibold">{variable.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {variable.description}
-                    </p>
-                    <p className="text-xs text-gray-500 mb-2">
-                      Used in:{" "}
-                      {variable.promptIds
-                        .map((id) => {
-                          const prompt = config.prompts.find(
-                            (p) => p.id === id
-                          );
-                          return prompt?.name || id;
-                        })
-                        .join(", ")}
-                    </p>
-                    <div className="space-y-2">
-                      <div>
-                        <textarea
-                          className="w-full p-2 border rounded text-sm"
-                          value={variables[variable.name]?.[scenarioId] || ""}
-                          onChange={(e) =>
-                            handleVariableChange(
-                              variable.name,
-                              e.target.value,
-                              scenarioId
-                            )
-                          }
-                          rows={2}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="overflow-x-auto">
+        <div className="grid grid-cols-4 gap-4"></div>
 
         <div className="flex-1">
-          <div className="flex divide-gray-200 truncate">
+          <div className="sticky top-0  grid grid-cols-5 flex divide-gray-200 truncate grid grid-cols-4 gap-4">
+            <div></div>
             {config.prompts.map((prompt) => (
-              <div className="" key={prompt.id}>
-                {prompt.name}
-                <div className="whitespace-pre-wrap">
-                  {typeof prompt.template === "string"
-                    ? prompt.template
-                    : prompt.template.join("\n")}
+              <div className="relative" key={prompt.id}>
+                <div className="sticky top-0 bg-white z-10 py-2 border-b shadow-sm">
+                  {prompt.name}
                 </div>
+
+                <OutputDisplay
+                  output={
+                    typeof prompt.template === "string"
+                      ? prompt.template
+                      : prompt.template.join("\n")
+                  }
+                />
               </div>
             ))}
           </div>
           {SCENARIOS.map((scenarioId) => (
-            <div key={scenarioId} className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">
-                Scenario {scenarioId + 1}
-              </h3>
-              <table className="min-w-full divide-y divide-gray-200">
+            <div key={scenarioId} className="mb-8 grid grid-cols-5">
+              <div className="col-span-1">
+                <div>{generateScenarioForm(scenarioId)}</div>
+              </div>
+              <table className="min-w-full divide-y divide-gray-200 col-span-4">
                 <thead className="bg-gray-50">
                   <tr>
                     {config.prompts.map((prompt) => (
                       <th
                         key={prompt.id}
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-2 py-2 text-left text-xs font-medium text-gray-500"
                       >
                         <div className="">{prompt.name}</div>
                       </th>
@@ -290,17 +289,19 @@ export default function CompareView() {
                   </tr>
                   <tr>
                     {config.prompts.map((prompt) => (
-                      <td key={prompt.id} className="px-6 py-4">
-                        {prompt.variables
-                          .map(
-                            (v) =>
-                              `${v.name}: ${
-                                variables[v.name]?.[scenarioId] ||
-                                v.default ||
-                                ""
-                              }`
-                          )
-                          .join(", ")}
+                      <td key={prompt.id} className="px-2 py-2">
+                        {prompt.variables.map((v, idx) => (
+                          <div key={idx} className="text-black-600 truncate">
+                            <span className="text-gray-500">{v.name}:</span>
+                            <span className="text-gray-800">
+                              <span>
+                                {variables[v.name]?.[scenarioId] ||
+                                  v.default ||
+                                  ""}
+                              </span>
+                            </span>
+                          </div>
+                        ))}
                       </td>
                     ))}
                   </tr>
@@ -309,7 +310,7 @@ export default function CompareView() {
                       <th
                         key={prompt.id}
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-2 py-2 text-left text-xs font-medium text-gray-500 "
                       >
                         <div className="">
                           <button
@@ -325,7 +326,7 @@ export default function CompareView() {
                           >
                             {isLoading[`${prompt.id}-${scenarioId}`]
                               ? "Running..."
-                              : "Re-run"}
+                              : "Run"}
                           </button>
                         </div>
                       </th>

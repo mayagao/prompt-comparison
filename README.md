@@ -12,6 +12,8 @@ I find this tool most useful after the early rapid iteration stage when I'm read
 4. Enter variables for each set of scenarios
 5. Click Run to test the different prompts variations across different scnearios!
 
+Variables used across different prompt variations will be detected and shared, so you only need to enter them once—just ensure they have the same name like `patch_url`.
+
 ## Run the dev server
 
 ```bash

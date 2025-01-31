@@ -25,4 +25,10 @@ li {
     content: "•";
     margin-right: 0.5rem;
   }
+  > ul {
+    margin-left: 1rem;
+  }
+}
+pre {
+  text-wrap: pretty;
 }

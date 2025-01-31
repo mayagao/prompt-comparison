@@ -74,6 +74,42 @@ const MetricsDisplay = ({ metrics }: { metrics: MetricsData }) => {
   );
 };
 
+const getAllVariables = () => {
+  const variableMap = new Map<
+    string,
+    {
+      name: string;
+      description: string;
+      isMain: boolean;
+      promptIds: string[]; // Track which prompts use this variable
+    }
+  >();
+
+  config.prompts.forEach((prompt) => {
+    prompt.variables.forEach((v) => {
+      if (variableMap.has(v.name)) {
+        const existing = variableMap.get(v.name)!;
+        if (!existing.promptIds.includes(prompt.id)) {
+          existing.promptIds.push(prompt.id);
+        }
+        if (!existing.description.includes(v.description)) {
+          existing.description += `\n${v.description}`;
+        }
+        existing.isMain = existing.isMain || v.isMain;
+      } else {
+        variableMap.set(v.name, {
+          name: v.name,
+          description: v.description,
+          isMain: v.isMain,
+          promptIds: [prompt.id],
+        });
+      }
+    });
+  });
+
+  return Array.from(variableMap.values());
+};
+
 export default function CompareView() {
   const CACHE_KEY = "promptResults";
   const VARIABLES_CACHE_KEY = "promptVariables";
@@ -163,16 +199,6 @@ export default function CompareView() {
       </div>
       {error && (
         <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">{error}</div>
-      )}
-
-      {mainVariable && (
-        <MainVariableDisplay
-          variable={{
-            name: mainVariable.name,
-            value: variables[mainVariable.name] || "",
-          }}
-          onValueChange={handleMainVariableChange}
-        />
       )}
 
       <div className="overflow-x-auto">
@@ -286,6 +312,39 @@ export default function CompareView() {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div className="w-1/4 min-w-[300px]">
+        <h2 className="text-lg font-semibold mb-4">Variables</h2>
+        <div className="space-y-4">
+          {getAllVariables().map((variable) => (
+            <div key={variable.name} className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-md font-semibold">{variable.name}</h3>
+              <p className="text-sm text-gray-600 mb-2">
+                {variable.description}
+              </p>
+              <p className="text-xs text-gray-500 mb-2">
+                Used in:{" "}
+                {variable.promptIds
+                  .map((id) => {
+                    const prompt = config.prompts.find((p) => p.id === id);
+                    return prompt?.name || id;
+                  })
+                  .join(", ")}
+              </p>
+              <div className="space-y-2">
+                <div>
+                  <textarea
+                    className="w-full p-2 border rounded text-sm"
+                    value={variables[variable.name] || ""}
+                    onChange={(e) => handleMainVariableChange(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

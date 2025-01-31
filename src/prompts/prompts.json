@@ -19,7 +19,7 @@
       "name": "Text Summarizer",
       "description": "Summarizes text in a specified style",
       "template": [
-        "As a **senior technical writer** at a major software company, analyze the changes in {patch_url} and create clear, scannable summary.",
+        "As a **senior technical writer** at a major software company, analyze the changes in {patch_url} and create clear, scannable summary in under 80 words.",
         "",
         "Your writing must follow these key principles:",
         "- Use **bold headers** that developers can quickly scan",
@@ -56,7 +56,7 @@
       "name": "Text Summarizer",
       "description": "Summarizes text in a specified style",
       "template": [
-        "Transform the changes from {patch_url} into clear summary.",
+        "Transform the changes from {patch_url} into clear summary in under 80 words.",
         "",
         "- First, **identify the main theme** of the changes (performance, features, security, etc.).",
         "- Then, **categorize related changes** into 2-3 major groups.",
@@ -113,6 +113,57 @@
         }
       ],
       "modelConfig": "gpt35"
+    },
+    {
+      "id": "summarize-4",
+      "name": "Additional Context",
+      "description": "Summarizes GitHub PR in a technical writer style",
+      "template": [
+        "As a **senior technical writer** at a major software company, analyze the following GitHub Pull Request and create a clear, scannable summary in under 80 words:",
+        "",
+        "PR Context:",
+        "- Title: {pr_title}",
+        "- Description: {pr_description}",
+        "- Changed Files: {changed_files}",
+        "",
+        "Your writing must follow these key principles:",
+        "- Use **bold headers** that developers can quickly scan",
+        "- **Group related changes** together logically",
+        "- Maintain **technical precision** while avoiding unnecessary jargon",
+        "- Focus on **impact and value** to the developer",
+        "- Reference specific files/components when relevant",
+        "",
+        "Format the release notes as follows:",
+        "This pull request implements **[list key changes from title/description]** for [extract purposes from PR context]",
+        "* **[Category based on changed files/components]**: [What changed and why it matters for developers]",
+        "* **[Category]**: [Technical details with clear impact statement]"
+      ],
+      "variables": [
+        {
+          "name": "patch_url",
+          "description": "GitHub PR URL",
+          "type": "string",
+          "isMain": true
+        },
+        {
+          "name": "pr_title",
+          "description": "Title from GitHub PR",
+          "type": "string",
+          "isMain": true
+        },
+        {
+          "name": "pr_description",
+          "description": "Description/body from GitHub PR",
+          "type": "string",
+          "isMain": true
+        },
+        {
+          "name": "changed_files",
+          "description": "List of files changed in PR",
+          "type": "array",
+          "isMain": true
+        }
+      ]
     }
   ]
 }

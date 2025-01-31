@@ -7,7 +7,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("compare");
 
   return (
-    <main className="container mx-auto py-6">
+    <main className="px-2 mx-auto py-6">
       <div className="w-full">
         {/* Tab Navigation */}
         <div className="border-b border-gray-200">
